@@ -18,9 +18,12 @@ class Template
 			 */
 			$file = ROOT.DS.'app'.DS.'views'.DS.$viewName.'.php';
 			if (!file_exists($file))
+			{
 				throw new Exception('View ' . $viewName . ' not found.');
 				//Fallback?
-			else {
+			} 
+			else 
+			{
 	
 				foreach ($this->vars as $key => $value)
 				{

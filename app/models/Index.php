@@ -1,9 +1,8 @@
 <?php
 
-class TestModel extends BaseModel
+class Index extends BaseModel
 {
 	private $testData = 'data from the model';
-	static $instance;
 
 	public function getData()
 	{

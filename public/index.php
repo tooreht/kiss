@@ -18,17 +18,12 @@
 	$router->route($registry);
 
 	/*** auto load model classes ***/
-	function __autoload($class_name)
+	function __autoload($className)
 	{
 		try
 		{
-			$filename = $class_name . '.php';
-			$file = ROOT.DS.'app'.DS.'models'.DS.$filename;
-
-			if (file_exists($file))
-				include ($file);
-			else
-				throw new Exception('model ' . $class_name . '.php not found');
+			if(!searchIncludePath($className))
+				throw new Exception('Class ' . $className . '.php not found');
 		}
 		catch(Exception $e)
 		{

@@ -6,13 +6,15 @@ class BaseModel
 	
 	protected $db;
 	protected $limit;
+	protected $table;
 	
 	function __construct($registry)
 	{
 		$this->registry = $registry;
-		$this->db = new MysqlImprovedDriver();
+		$this->db = MysqlImprovedDriver::getInstance();
 		$this->db->connect();
 		$this->limit = PAGINATE_LIMIT;
+		$this->table = $this->registry->modelName;
 		
 		/*
 		if (!isset($this->abstract)) {
@@ -22,6 +24,6 @@ class BaseModel
 	}
 	
 	function __destruct(){
-		$this->db->disconnect();
+		//$this->db->disconnect();
 	}
 }

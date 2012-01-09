@@ -31,6 +31,10 @@ final class MysqlImprovedDriver extends DatabaseLibrary
 	 */
 	private function __construct(){}
 	
+	private function __destruct(){
+		$this->disconnect();
+	}
+	
 	/** prevent cloning */
 	private function __clone(){}
 

@@ -32,13 +32,14 @@ class Router
 		if(is_readable($file))
 		{
 			include $file;
-			$class = $this->controller . 'Controller';
+			$class = $this->controller.'Controller';
 		}
 		else
 		{
 			include ROOT.DS.'app'.DS.'controllers'.DS.'Error404Controller.php';
 			$class = 'Error404Controller';
 		}
+		require_once(ROOT.DS.'lib'.DS.'BaseModel.php');
 		$controller = new $class($registry);
 
 		if (is_callable(array($controller, $this->action)))
