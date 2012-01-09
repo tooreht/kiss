@@ -1,10 +1,15 @@
 <?php
 	
-	require_once('config/config.php/');
-	require_once('config/helper.php/');
-	require_once('app/Router.php');
-	require_once('app/Registry.php');
-	require_once('app/Template.php');
+	define('DS', DIRECTORY_SEPARATOR);
+	define('ROOT', dirname(dirname(__FILE__)));
+	
+	require_once(ROOT.DS.'config'.DS.'config.php');
+	require_once(ROOT.DS.'config'.DS.'helper.php');
+	setReporting();
+	
+	require_once(ROOT.DS.'lib'.DS.'Router.php');
+	require_once(ROOT.DS.'lib'.DS.'Registry.php');
+	require_once(ROOT.DS.'lib'.DS.'Template.php');
 
 	$router = new Router();
 	$registry = new Registry();
@@ -17,8 +22,8 @@
 	{
 		try
 		{
-			$filename = strtolower($class_name) . '.php';
-			$file = 'app/models/' . $filename;
+			$filename = $class_name . '.php';
+			$file = ROOT.DS.'app'.DS.'models'.DS.$filename;
 
 			if (file_exists($file))
 				include ($file);

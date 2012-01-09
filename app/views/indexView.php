@@ -8,7 +8,7 @@
 <body>
 <h1>Test Page</h1>
 <p>
-<?php echo $test; ?>
+<?php print_r($test); ?>
 </p>
 </body>
 </html>

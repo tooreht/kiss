@@ -2,22 +2,33 @@
 
 class Router
 {
-	private $path, $controller, $action;
+	private $path, $controller, $action, $query;
 	static $instance;
 
 	public function __construct()
 	{
+		/*
+		 * TODO santizise request
+		 */
+		
+		$this->path = SITE_ROOT;
 		$request = $_GET['request'];
 		$split = explode('/',trim($request,'/'));
-
-		$this->controller = !empty($split[0]) ? ucfirst($split[0]) : 'Index';
-		$this->action = !empty($split[1]) ? $split[1] : 'index';
+		
+		$tmp = array_shift($split);
+		$this->controller = !empty($tmp) ? $tmp : 'Index';
+		$tmp = array_shift($split);
+		$this->action = !empty($tmp) ? $tmp : 'index';
+		$this->query = $split;
 	}
 
 	public function route($registry)
 	{
-		require_once('app/BaseController.php');
-		$file = 'app/controllers/' . $this->controller . 'Controller.php';
+		$registry->controllerName = $this->controller.'Controller';
+		$registry->modelName = $this->controller;
+		
+		require_once(ROOT.DS.'lib'.DS.'BaseController.php');
+		$file = ROOT.DS.'app'.DS.'controllers'.DS.$this->controller.'Controller.php';
 		if(is_readable($file))
 		{
 			include $file;
@@ -25,7 +36,7 @@ class Router
 		}
 		else
 		{
-			include 'app/controllers/Error404Controller.php';
+			include ROOT.DS.'app'.DS.'controllers'.DS.'Error404Controller.php';
 			$class = 'Error404Controller';
 		}
 		$controller = new $class($registry);
@@ -34,6 +45,8 @@ class Router
 			$action = $this->action;
 		else
 			$action = 'index';
-		$controller->$action();
+		$controller->beforeAction($this->query);
+		$controller->$action($this->query);
+		$controller->afterAction($this->query);
 	}
 }
