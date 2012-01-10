@@ -25,7 +25,7 @@ class Router
 	public function route($registry)
 	{
 		$registry->controllerName = $this->controller.'Controller';
-		$registry->modelName = $this->controller;
+		$registry->modelName = $this->controller.'Model';
 		
 		require_once(ROOT.DS.'lib'.DS.'BaseController.php');
 		$file = ROOT.DS.'app'.DS.'controllers'.DS.$this->controller.'Controller.php';
@@ -49,5 +49,13 @@ class Router
 		$controller->beforeAction($this->query);
 		$controller->$action($this->query);
 		$controller->afterAction($this->query);
+	}
+	
+	public function performAction($controller, $action, $query, $registry)
+	{
+		$this->controller = $controller;
+		$this->action = $action;
+		$this->query = $query;
+		$this->route($registry);
 	}
 }

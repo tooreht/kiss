@@ -13,4 +13,11 @@ class Registry
 	{
 		return $this->vars[$index];
 	}
+	
+	public function clear($index = NULL){
+		if($index === NULL)
+			$this->vars = array();
+		else 
+			$this->vars[$index] = NULL;
+	}
 }

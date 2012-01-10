@@ -13,11 +13,12 @@
 
 	$router = new Router();
 	$registry = new Registry();
+	$registry->router = $router;
 	$registry->template = new Template();
 
 	$router->route($registry);
 
-	/*** auto load model classes ***/
+	/*** auto load classes ***/
 	function __autoload($className)
 	{
 		try

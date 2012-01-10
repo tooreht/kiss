@@ -16,11 +16,12 @@ function setReporting()
 }
 
 function searchIncludePath($className){
-	$pre = ROOT.DS;
 	$paths = array(
-		$pre.'app'.DS.'models'.DS.$className.'.php',
-		$pre.'lib'.DS.$className.'.php',
-		$pre.'app'.DS.'controllerss'.DS.$className.'.php'
+		ROOT.DS.'app'.DS.'models'.DS.$className.'.php',
+		ROOT.DS.'lib'.DS.$className.'.php',
+		ROOT.DS.'config'.DS.$className.'.php',
+		ROOT.DS.'app'.DS.'controllers'.DS.$className.'.php',
+		ROOT.DS.'app'.DS.'views'.DS.$className.'.php'
 	);
 	
 	foreach($paths as $path)

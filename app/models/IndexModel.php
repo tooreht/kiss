@@ -1,6 +1,6 @@
 <?php
 
-class Index extends BaseModel
+class IndexModel extends BaseModel
 {
 	private $testData = 'data from the model';
 
