@@ -9,4 +9,5 @@
 		<div id="wrapper">
 			<header>
 				<p>Header</p>
+				<h1>Test Page</h1>
 			</header>
