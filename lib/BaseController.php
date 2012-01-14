@@ -2,18 +2,25 @@
 
 abstract class BaseController
 {
-	protected $registry;
+	protected $router;
+	protected $template;
 	
 	protected $model;
-	public $showWholePage;
+	public $wholePage;
 
-	function __construct($registry)
+	function __construct($router)
 	{
-		$this->registry = $registry;
-		$class = $this->registry->modelName;
-		$this->model = new $class($this->registry);//ucfirst($controller);
+		$this->router = $router;
+
+		$model = $this->router->controller;
+		$class = $model.'Model'; // think about
+		$table = $model;
+		$this->$model = new $class();//ucfirst($controller);
+		$this->template = new Template();
 		$this->showWholePage = TRUE;
 	}
+	
+	public function __destruct(){}
 	
 	abstract function beforeAction();
 	

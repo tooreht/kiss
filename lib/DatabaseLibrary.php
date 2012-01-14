@@ -3,11 +3,11 @@
 /**
  * The Database Library handles database interaction for the application
  */
-abstract class DatabaseLibrary
+interface DatabaseLibrary
 {
-	abstract protected function connect();
-	abstract protected function disconnect();
-	abstract protected function prepare($query);
-	abstract protected function query();
-	abstract protected function fetch($type = 'object');
+	public function connect();
+	public function disconnect();
+	public function prepare($query);
+	public function query();
+	public function fetch($type = 'object');
 }

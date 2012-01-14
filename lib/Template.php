@@ -16,15 +16,16 @@ class Template
 			/**
 			 * Check if view exists
 			 */
-			$file = ROOT.DS.'app'.DS.'views'.DS.$viewName.'.php';
-			if (!file_exists($file))
+			$viewsPath = ROOT.DS.'app'.DS.'views'.DS;
+			$fileName = $viewsPath.$viewName;
+			$fileContent = $fileName.'.php';
+			if (!file_exists($fileContent))
 			{
 				throw new Exception('View ' . $viewName . ' not found.');
 				//Fallback?
 			} 
 			else 
 			{
-	
 				foreach ($this->vars as $key => $value)
 				{
 					$$key = $value;
@@ -33,9 +34,12 @@ class Template
 				/** Header */
 				if($showWholePage)
 				{
-					$file = $file.DS.'header.php';
-					if(file_exists($file))
-						include($file);
+					$fileHeader = $fileName.DS.'header.php';
+					$fileAltHeader = $viewsPath.'header.php';
+					if(file_exists($fileHeader))
+						include($fileHeader);
+					else if(file_exists($fileAltHeader))
+						include($fileAltHeader);
 					else {
 						throw new Exception('Header of View ' . $viewName . ' not found.');
 						//Fallback?
@@ -43,15 +47,18 @@ class Template
 				}
 	
 				/** Content */
-				include($file);
+				include($fileContent);
 				
 				
 				/** Footer */
 				if($showWholePage)
 				{
-					$file = $file.DS.'footer.php';
-					if(file_exists($file))
-						include($file);
+					$fileFooter = $fileName.DS.'footer.php';
+					$fileAltFooter = $viewsPath.'footer.php';
+					if(file_exists($fileFooter))
+						include($fileFooter);
+					else if(file_exists($fileAltFooter))
+						include($fileAltFooter);
 					else {
 						throw new Exception('Footer of View ' . $viewName . ' not found.');
 						//Fallback?
