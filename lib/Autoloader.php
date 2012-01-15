@@ -33,9 +33,9 @@ class Autoloader
 		
 		foreach($paths as $path)
 		{
-			echo 'Trying to load ', $className, ' via ', __METHOD__, "()\n";
+			//echo 'Trying to load ', $className, ' via ', __METHOD__, "()\n";
 			if(file_exists($path)){
-				echo 'Succeded to load ', $className, ' in ', $path."\n"; "\n";
+				//echo 'Succeded to load ', $className, ' in ', $path."\n"; "\n";
 				include($path);
 				return TRUE;
 			}

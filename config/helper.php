@@ -14,22 +14,3 @@ function setReporting()
 		ini_set('error_log', ROOT.DS.'tmp'.DS.'logs'.DS.'error.log');
 	}
 }
-
-function searchIncludePath($className){
-	$paths = array(
-		ROOT.DS.'app'.DS.'models'.DS.$className.'.php',
-		ROOT.DS.'lib'.DS.$className.'.php',
-		ROOT.DS.'config'.DS.$className.'.php',
-		ROOT.DS.'app'.DS.'controllers'.DS.$className.'.php',
-		ROOT.DS.'app'.DS.'views'.DS.$className.'.php'
-	);
-	
-	foreach($paths as $path)
-	{
-		if(file_exists($path)){
-			include($path);
-			return TRUE;
-		}
-	}
-	return FALSE;
-}

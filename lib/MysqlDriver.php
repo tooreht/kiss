@@ -1,9 +1,10 @@
 <?php
 
 /**
- * The MySQL Improved driver extends the DatabaseLibrary to provide 
+ * The MySQL driver extends the DatabaseLibrary to provide 
  * interaction with a MySQL database
  */
+
 final class MysqlDriver implements DatabaseLibrary
 {	
     /**
@@ -26,6 +27,7 @@ final class MysqlDriver implements DatabaseLibrary
 	 */
 	public $numRows;
 	public $numFields;
+	public $affectedRows;
 	
 	/**
 	 * Singleton instance
@@ -52,7 +54,7 @@ final class MysqlDriver implements DatabaseLibrary
 	 */
 	public static function getInstance()
 	{
-		if(self::$instance === null)
+		if(self::$instance === NULL)
 			self::$instance = new self();
 		return self::$instance;
 	}
@@ -122,6 +124,7 @@ final class MysqlDriver implements DatabaseLibrary
         {
 			try
 			{
+print $this->query;
 				//execute prepared query and store in result variable
 				$this->result = $this->connection->query($this->query);
 				if($this->result === FALSE)
@@ -129,8 +132,10 @@ final class MysqlDriver implements DatabaseLibrary
 					throw new Exception('MySQL error: '.$this->connection->error);
 					return FALSE;
 				}
-				$this->numRows = $this->result->num_rows; // $this->connection->affected_rows
-				$this->numFields = $this->result->field_count;
+//echo 'Result: '.var_dump($this->result)."end\n";
+				//if( is_object($this->result) )
+				if( is_object($this->result) )
+					$this->getResultProperties();		
 			}
 			catch(Exception $e)
 			{
@@ -143,6 +148,12 @@ final class MysqlDriver implements DatabaseLibrary
     
         return FALSE;        
     }
+	
+	private function getResultProperties(){
+		$this->numRows = $this->result->num_rows;
+		$this->numFields = $this->result->field_count;
+		$this->affectedRows = $this->connection->affected_rows;
+	}
 
     /**
      * Fetch a row from the query result
@@ -198,8 +209,7 @@ final class MysqlDriver implements DatabaseLibrary
 	
 	public function escape($string)
 	{
-		print "String to escape".$string."\n";
-		print_r($string);
+		//print "String to escape: ".$string."\n";
 		return $this->connection->real_escape_string($string);
 	}
 	
