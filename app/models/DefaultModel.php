@@ -2,5 +2,7 @@
 
 class DefaultModel extends BaseModel
 {
-	public $hasMany = array('Categories', 'Categories');	
+	protected $model = 'Categories';
+	protected $table = 'categories';
+	protected $hasMany = array('Categories', 'categories');	
 }

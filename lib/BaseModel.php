@@ -21,7 +21,7 @@ class BaseModel extends SqlQuery
 	public function __construct()
 	{	
 		$this->limit = PAGINATE_LIMIT;
-		$this->db = MysqlDriver::getInstance();
+		$this->db = MysqliDriver::getInstance();
 		$this->db->connect();
 		$this->initData();
 	}

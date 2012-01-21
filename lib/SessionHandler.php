@@ -167,7 +167,7 @@ class SessionHandler
 	 * Instantiate the MysqlDriver for a connection
 	 */
 	public function __construct(){
-		$this->db = MysqlDriver::getInstance();
+		$this->db = MysqliDriver::getInstance();
 		$this->db->connect();
 		
 		/**
@@ -226,8 +226,7 @@ class SessionHandler
     public function close()
     {
     	// release the lock associated with the current session
-        $this->db->prepare('SELECT RELEASE_LOCK("' . $this->sessionLock . '")');
-		return $this->db->query();
+		return $this->db->query('SELECT RELEASE_LOCK("'.$this->sessionLock.'")');
     }
 	
 	
@@ -242,15 +241,13 @@ class SessionHandler
 		$this->sessionLock = $this->db->escape('session_' . $id);
 		
 		// try to obtain a lock with the given name and timeout
-		$this->db->prepare('SELECT GET_LOCK("'.$this->sessionLock.'", '.$this->db->escape($this->lockTimeout).')');
-		$this->db->query();
+		$this->db->query('SELECT GET_LOCK("'.$this->sessionLock.'", '.$this->db->escape($this->lockTimeout).')');
 		
 		$sql = 'SELECT `session_data` FROM `'.$this->table.'` WHERE `session_id` = '."'".$this->db->escape($id)."' AND "; 
 		$sql .= '`session_expire` > '.time().' AND `http_user_agent` = ';
 		$sql .= '"'.$this->db->escape(md5((isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '').$this->securityCode)).'" LIMIT 1';
-		$this->db->prepare($sql);
 
-		if($this->db->query())
+		if($this->db->query($sql))
 		{
 			if($this->db->numRows && $this->db->numRows > 0)
 			{
@@ -281,9 +278,7 @@ class SessionHandler
 		$sql .= '`session_data` = "'.$data.'",';
 		$sql .= '`session_expire` = "'.$expire.'"'; 
 		
-		$this->db->prepare($sql);
-		
-		if($this->db->query() && $this->db->affectedRows !== -1)
+		if($this->db->query($sql) && $this->db->affectedRows !== -1)
 			return TRUE;
 		return FALSE;
 	}
@@ -297,8 +292,7 @@ class SessionHandler
 	public function destroy($id)
 	{
 		$sql = 'DELETE FROM `'.$this->table.'` WHERE session_id = \''.$this->db->escape($id).'\'';
-		$this->db->prepare($sql);
-		if($this->db->query() && $this->db->affectedRows !== -1)
+		if($this->db->query($sql) && $this->db->affectedRows !== -1)
 			return TRUE;
 		return FALSE;
 	}
@@ -318,8 +312,7 @@ class SessionHandler
     {
     	$expired = $this->db->escape( (time() - $maxLivetime) );
         $sql = 'DELETE FROM `'.$this->table.'` WHERE `session_expire` < '.$expired ;
-		$this->db->prepare($sql);
-        return $this->db->query();
+        return $this->db->query($sql);
     }
 	
     public function getActiveSessions()
@@ -329,8 +322,7 @@ class SessionHandler
 
         // counts the rows from the database
         $sql = 'SELECT COUNT(`session_id`) AS count FROM `'.$this->table.'`';
-        $this->db->prepare($sql);
-		$this->db->query();
+		$this->db->query($sql);
 		$result = $this->db->fetch('assoc');
 		// return the number of found rows
 		return $result['count'];

@@ -5,7 +5,7 @@
  * interaction with a MySQL database
  */
 
-final class MysqlDriver implements DatabaseLibrary
+final class MysqliDriver implements DatabaseLibrary
 {	
     /**
      * Connection holds MySQLi resource
@@ -45,6 +45,7 @@ final class MysqlDriver implements DatabaseLibrary
 	public function __construct()
 	{
 		$this->connect();
+		$this->stmt = $this->connection->stmt_init();
 	}
 	
 	public function __destruct(){
@@ -74,6 +75,7 @@ final class MysqlDriver implements DatabaseLibrary
         //create new mysqli connection
         $this->connection = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME , DB_PORT, DB_SOCKET);
 //print "After........".var_dump($this->connection);
+		//mysqli_connect_errno()
 		if($this->connection)
 		{
 			if($this->connection->set_charset('utf8'))
@@ -82,7 +84,7 @@ final class MysqlDriver implements DatabaseLibrary
 			}
 			else
 			{
-				printf("Error loading character set utf8: %s\n", $mysqli->error);
+				printf("Error loading character set utf8: %s\n", $this->connection->error);
 			}
 		}
 		printf("Connect failed: %s\n", mysqli_connect_error());
@@ -96,97 +98,51 @@ final class MysqlDriver implements DatabaseLibrary
     {
         //clean up connection!
 		if($this->connection)
-			$this->connection->close();    
+			$this->connection->close();
 			
         return TRUE;
     }
-
-    /**
-     * Prepare query to execute
-     * 
-     * @param $query
-     */
-    public function prepare($query)
-    {
-        //store query in query variable
-        //$this->query = $query;
-        $this->stmt = $this->connection->prepare($query);
-        return TRUE;
-    }
-    
-    public function bindParam($types, $fields)
-	{
-		$this->stmt->bind_param($types, implode(', ', $fields));
-	}
 	
-    public function bindResult($fields)
-	{
-		$this->stmt->bind_result(implode(', ', $fields));
-	}
-	
+		
 	// Debug
 	public function getQuery()
 	{
 		return $this->query;
 	}
 
-    /**
-     * Execute a prepared query
-     */
-    public function exec()
-    {
-        if (isset($this->stmt))
-        {
-			try
-			{
-				//execute prepared query
-				$this->stmt->execute();
-		
-			}
-			catch(Exception $e)
-			{
-				echo $e->getMessage();
-				exit(0);
-			}
-			
-            return TRUE;
-        }
-    
-        return FALSE;        
-    }
-	
-    /**
+	/**
      * Execute a normal query
      */
-    public function query($query)
-    {
-        if (!empty($query))
-        {
+	public function query($query)
+	{
+		if (!empty($query))
+		{
 			try
 			{
-print $this->query;
-				$this->result = $this->connection->query($this->query);
-				if($this->result === FALSE)
+print 'query: '.$query;
+				$this->result = $this->connection->query($query);
+				if($this->result)
+				{
+//echo 'Result: '.var_dump($this->result)."end\n";
+				//if( is_object($this->result) )
+					if( is_object($this->result) )
+						$this->getResultProperties();	
+					return TRUE;
+				}
+				else
 				{
 					throw new Exception('MySQL error: '.$this->connection->error);
 					return FALSE;
 				}
-//echo 'Result: '.var_dump($this->result)."end\n";
-				//if( is_object($this->result) )
-				if( is_object($this->result) )
-					$this->getResultProperties();		
 			}
 			catch(Exception $e)
 			{
 				echo $e->getMessage();
 				exit(0);
 			}
-			
-            return TRUE;
         }
-    
         return FALSE;
-	}   
+	} 
     
 	
 	private function getResultProperties(){
@@ -228,14 +184,10 @@ print $this->query;
                     //fetch a field as array
                     $row = $this->result->fetch_fields();
             
-                break;
+                break;  
 				
-				case 'stmt':
-                    //fetch a field as array
-                    $row = $this->stmt->fetch();
-            
-                break;
-            
+				case 'all':
+					return $this->result->fetch_all();
             
                 case 'object':
             
@@ -282,4 +234,137 @@ print $this->query;
 		}
 		return FALSE;
 	}
+
+
+
+	/** prepared statements code, not mature for real use!!! */
+	
+	public function closeStmt()
+	{
+		if($this->stmt)
+			$this->stmt->close();
+	}
+	
+	/**
+	* This method is needed for prepared statements. They require
+	* the data type of the field to be bound with "i" s", etc.
+	* This function takes the input, determines what type it is,
+	* and then updates the param_type.
+	*
+	* @param mixed $item Input to determine the type.
+	* @return string The joined parameter types.
+	*/
+	protected function determineType($item)
+	{
+		switch (gettype($item))
+		{
+		case 'string':
+			return 's';
+			break;
+	
+		case 'integer':
+			return 'i';
+			break;
+	
+		case 'blob':
+			return 'b';
+			break;
+	
+		case 'double':
+			return 'd';
+			break;
+		}
+	}
+
+    /**
+     * Prepare query to execute
+     * 
+     * @param $query
+     */
+    public function prepare($query)
+    {
+        //store query in query variable
+        //$this->query = $query;
+print $query."\n";
+        if(! $this->stmt = $this->connection->prepare($query))
+        {
+        	trigger_error("Problem preparing query", E_USER_ERROR);
+        	return TRUE;
+		}
+		return FALSE;
+    }
+    
+	/** May only work on new php versions, use more time consuming bindResult method instead */
+	public function getResult()
+	{
+		return $this->stmt->get_result();
+	}
+	
+    public function bindParam()
+	{
+		$params = func_get_args();
+var_export($params);
+		
+		$tmpArray = array();
+		foreach ($params as $i => $value)
+		{
+			$tmpArray[$i] = &$params[$i];
+		}
+print_r($tmpArray);
+		return call_user_func_array(array($this->stmt, 'bind_param'),$tmpArray);
+	}
+	
+    public function bindResult()
+	{
+		$parameters = array();
+		$results = array();
+		
+		$meta = $this->stmt->result_metadata();
+		
+		while($field = $meta->fetch_field())
+		{
+			$parameters[] = &$row[$field->name];
+		}
+		
+		call_user_func_array(array($this->stmt, 'bind_result'),$parameters);
+
+		while ($this->stmt->fetch())
+		{
+			$x = array();
+			foreach ($row as $key => $val)
+			{
+				$x[$key] = $val;
+			}
+			$results[] = $x;
+		}
+		 
+		$meta->free();
+		
+		return $results;
+	}
+	
+    /**
+     * Execute a prepared query
+     */
+    public function exec()
+    {
+        if (isset($this->stmt))
+        {
+			try
+			{
+				//execute prepared query
+				$this->stmt->execute();
+		
+			}
+			catch(Exception $e)
+			{
+				echo $e->getMessage();
+				exit(0);
+			}
+			
+            return TRUE;
+        }
+    
+        return FALSE;        
+    }
 }
