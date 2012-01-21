@@ -21,6 +21,11 @@ final class MysqlDriver implements DatabaseLibrary
      * Result holds data retrieved from server
      */
     private $result;
+	
+	/**
+	 * Ressource that holds the prepeared statement 
+	 */
+	private $stmt;
 
 	/**
 	 * result information
@@ -104,10 +109,20 @@ final class MysqlDriver implements DatabaseLibrary
     public function prepare($query)
     {
         //store query in query variable
-        $this->query = $query;    
-    
+        //$this->query = $query;
+        $this->stmt = $this->connection->prepare($query);
         return TRUE;
     }
+    
+    public function bindParam($types, $fields)
+	{
+		$this->stmt->bind_param($types, implode(', ', $fields));
+	}
+	
+    public function bindResult($fields)
+	{
+		$this->stmt->bind_result(implode(', ', $fields));
+	}
 	
 	// Debug
 	public function getQuery()
@@ -118,14 +133,38 @@ final class MysqlDriver implements DatabaseLibrary
     /**
      * Execute a prepared query
      */
-    public function query()
+    public function exec()
     {
-        if (isset($this->query))
+        if (isset($this->stmt))
+        {
+			try
+			{
+				//execute prepared query
+				$this->stmt->execute();
+		
+			}
+			catch(Exception $e)
+			{
+				echo $e->getMessage();
+				exit(0);
+			}
+			
+            return TRUE;
+        }
+    
+        return FALSE;        
+    }
+	
+    /**
+     * Execute a normal query
+     */
+    public function query($query)
+    {
+        if (!empty($query))
         {
 			try
 			{
 print $this->query;
-				//execute prepared query and store in result variable
 				$this->result = $this->connection->query($this->query);
 				if($this->result === FALSE)
 				{
@@ -146,8 +185,9 @@ print $this->query;
             return TRUE;
         }
     
-        return FALSE;        
-    }
+        return FALSE;
+	}   
+    
 	
 	private function getResultProperties(){
 		$this->numRows = $this->result->num_rows;
@@ -189,6 +229,13 @@ print $this->query;
                     $row = $this->result->fetch_fields();
             
                 break;
+				
+				case 'stmt':
+                    //fetch a field as array
+                    $row = $this->stmt->fetch();
+            
+                break;
+            
             
                 case 'object':
             

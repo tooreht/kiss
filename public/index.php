@@ -5,8 +5,6 @@
 	
 	require_once(ROOT.DS.'config'.DS.'config.php');
 	require_once(ROOT.DS.'config'.DS.'helper.php');
-	
-	setReporting();
 
 	require_once(ROOT.DS.'lib'.DS.'Autoloader.php');
 	
@@ -15,11 +13,13 @@
 	
 	$session = new SessionHandler();
 	
+	setReporting();
+	
 	print_r($session->getSettings());
 	print 'Active Sessions: '.$session->getActiveSessions();
 	//$session->stop();
 	
-	$_SESSION['test'] = 'Marc Zimmermann';
+	$_SESSION['test'] = 'How do you think about?';
 	
 	/** Let's go! */
 	$router = new Router();

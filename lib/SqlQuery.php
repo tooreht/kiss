@@ -122,7 +122,7 @@ class SqlQuery
 	{
 		foreach($ins as $key => $value){
 			if($value !== null && $key !== null){
-				$value = $this->db->real_escape_string($value);
+				$value = $this->db->escape($value);
 				if(!is_numeric($value))
 					$value = "'".$value."'";
 				$columns[] = $key;
@@ -154,7 +154,7 @@ class SqlQuery
 		$tmp = array();
 		foreach($set as $key => $value){
 			if($value !== null && $key !== null){
-				$value = $this->db->real_escape_string($value);
+				$value = $this->db->escape($value);
 				if(!is_numeric($value))
 					$value = "'".$value."'";
 				$tmp[] = $key.' = '.$value;
@@ -186,8 +186,16 @@ class SqlQuery
 			return FALSE;
 		$query = $this->query;
 		$this->query = null;
-		$this->db->prepare($query);
-		return $this->db->query();
+		return $this->db->query($query);
+	}
+	
+	public function sql()
+	{
+		if($this->errors !== 0)
+			return FALSE;
+		$query = $this->query;
+		$this->query = NULL;
+		return $query;
 	}
 	
 }
