@@ -121,17 +121,19 @@ class SqlQuery
 	public function insert($table, $ins)
 	{
 		foreach($ins as $key => $value){
-			if($value !== null && $key !== null){
+			if($value !== NULL && $key !== NULL){
 				$value = $this->db->escape($value);
 				if(!is_numeric($value))
 					$value = "'".$value."'";
 				$columns[] = $key;
 				$values[] = $value;
+			} else {
+				$this->errors++;
 			}
 		}
 		$columns = implode(', ', $columns);
 		$values = implode(', ', $values);
-		if(empty($columns) || empty($values) || empty($table))
+		if(empty($table))
 			$this->errors++;
 		$this->query .= 'INSERT INTO ' . $table . ' (' . $columns . ') VALUES(' . $values .')';
 		return $this;
@@ -153,15 +155,19 @@ class SqlQuery
 	{
 		$tmp = array();
 		foreach($set as $key => $value){
+//print 'Key: '.$key.' Value: '.$value."\n";
 			if($value !== null && $key !== null){
 				$value = $this->db->escape($value);
 				if(!is_numeric($value))
 					$value = "'".$value."'";
 				$tmp[] = $key.' = '.$value;
+			} else {
+				$this->errors++;
 			}
 		}
+//print 'Errors: '.$this->errors;
 		$tmp = implode(', ', $tmp);
-		if(empty($tmp) || empty($table))
+		if(empty($table))
 			$this->errors++;
 		$this->query .= 'UPDATE '.$table.' SET '.$tmp;
 		return $this;
